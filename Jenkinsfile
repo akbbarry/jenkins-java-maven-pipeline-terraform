@@ -21,13 +21,20 @@ pipeline {
     stage("build image") {
       steps {
         script {
-          echo 'building docker image...'
-          buildImage(env.IMAGE_NAME)
-          dockerLogin()
-          dockerPush(env.IMAGE_NAME)
+            buildImage(env.IMAGE_NAME)
+
+            withCredentials([usernamePassword(
+              credentialsId: 'dockerhub-credentials',
+              usernameVariable: 'DOCKER_USERNAME',
+              passwordVariable: 'DOCKER_PASSWORD'
+              )]) {
+                sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
+              }
+
+              dockerPush(env.IMAGE_NAME)
+          }
         }
       }
-    }
     stage("provision server") {
       environment {
         AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
