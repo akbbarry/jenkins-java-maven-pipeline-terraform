@@ -38,7 +38,7 @@ pipeline {
     stage("provision server") {
       environment {
         TF_VAR_env_prefix = 'test'
-      } 
+      }
 
       steps {
         withCredentials([[
@@ -54,9 +54,9 @@ pipeline {
                         script: "terraform output -raw ec2_public_ip",
                         returnStdout: true
                     ).trim()
-                  }
                 }
-              }
+            }
+          }
         }
       }
     stage("deploy") {
