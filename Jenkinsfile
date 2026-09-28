@@ -36,24 +36,27 @@ pipeline {
         }
       }
     stage("provision server") {
-      environment {
-        AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
-        AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
+    environment {
         TF_VAR_env_prefix = 'test'
-      }
-      steps {
-        script {
-          dir('terraform') {
-            sh "terraform init -input=false -migrate-state -force-copy"
-            sh "terraform apply --auto-approve"
-            EC2_PUBLIC_IP = sh(
-              script: "terraform output ec2_public_ip",
-              returnStdout: true
-            ).trim()
+    }
+
+    steps {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+        ]]) {
+            dir('terraform') {
+                sh "terraform init -input=false -migrate-state -force-copy"
+                sh "terraform apply --auto-approve"
+
+                EC2_PUBLIC_IP = sh(
+                    script: "terraform output -raw ec2_public_ip",
+                    returnStdout: true
+                ).trim()
+            }
           }
         }
       }
-    }
     stage("deploy") {
       environment {
         DOCKER_CREDS = credentials('docker-hub-repo')
