@@ -36,11 +36,11 @@ pipeline {
         }
       }
     stage("provision server") {
-    environment {
+      environment {
         TF_VAR_env_prefix = 'test'
-    }
+      } 
 
-    steps {
+      steps {
         withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
@@ -49,12 +49,14 @@ pipeline {
                 sh "terraform init -input=false -migrate-state -force-copy"
                 sh "terraform apply --auto-approve"
 
-                EC2_PUBLIC_IP = sh(
-                    script: "terraform output -raw ec2_public_ip",
-                    returnStdout: true
-                ).trim()
-            }
-          }
+                script {
+                    env.EC2_PUBLIC_IP = sh(
+                        script: "terraform output -raw ec2_public_ip",
+                        returnStdout: true
+                    ).trim()
+                  }
+                }
+              }
         }
       }
     stage("deploy") {
