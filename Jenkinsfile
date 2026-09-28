@@ -24,14 +24,14 @@ pipeline {
             buildImage(env.IMAGE_NAME)
 
             withCredentials([usernamePassword(
-              credentialsId: 'dockerhub-credentials',
-              usernameVariable: 'DOCKER_USERNAME',
-              passwordVariable: 'DOCKER_PASSWORD'
-              )]) {
+                credentialsId: 'dockerhub-credentials',
+                usernameVariable: 'DOCKER_USERNAME',
+                passwordVariable: 'DOCKER_PASSWORD'
+            )]) {
                 sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
-              }
+            }
 
-              dockerPush(env.IMAGE_NAME)
+            sh 'docker push "$IMAGE_NAME"'
           }
         }
       }
