@@ -74,12 +74,13 @@ pipeline {
           def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME} ${DOCKER_CREDS_USR} ${DOCKER_CREDS_PSW}"
           def ec2Instance = "ec2-user@${EC2_PUBLIC_IP}"
 
-          sshagent(['server-ssh-key']) {
-            sh "scp -o StrictHostKeyChecking=no server-cmds.sh ${ec2Instance}:/home/ec2-user"
-            sh "scp -o StrictHostKeyChecking=no docker-compose.yaml ${ec2Instance}:/home/ec2-user"
-            sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
-          }
-        }
+          sh "chmod 600 myapp-key-pair.pem"
+          sh "chmod 600 terraform/myapp-key-pair.pem"
+          sh "scp -i terraform/myapp-key-pair.pem -o StrictHostKeyChecking=no server-cmds.sh ${ec2Instance}:/home/ec2-user"
+          sh "scp -i terraform/myapp-key-pair.pem -o StrictHostKeyChecking=no docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+          sh "ssh -i terraform/myapp-key-pair.pem -o StrictHostKeyChecking=no ${ec2Instance} '${shellCmd}'"
+          
+        } 
       }
     }               
   }
