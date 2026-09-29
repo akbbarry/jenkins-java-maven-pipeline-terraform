@@ -1,2 +1,5 @@
 .idea/*
 target
+# Terraform generated files
+terraform/.terraform/
+terraform/*.tfstate*
